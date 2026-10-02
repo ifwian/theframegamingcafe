@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — FRAME Gaming Café</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">FRAME <span class="brand-sub">/ ADMIN</span></a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navList">MENU</button>
+      <nav aria-label="Main">
+        <ul class="nav-list" id="navList">
+          <li><a href="index.html">HOME</a></li>
+          <li><a href="reservation.html">RESERVE</a></li>
+          <li><a href="admin.html" aria-current="page">ADMIN</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+
+    <div class="page-head">
+      <p class="section-label">FRAME / ADMIN</p>
+      <h1 class="page-title">RESERVATIONS.</h1>
+    </div>
+
+    <!-- Counts (calculated in admin.js from the database records) -->
+    <section class="admin-summary" aria-label="Reservation summary">
+      <div class="summary-item"><p class="section-label">TOTAL</p><p class="summary-number" id="count-total">—</p></div>
+      <div class="summary-item"><p class="section-label">PENDING</p><p class="summary-number" id="count-pending">—</p></div>
+      <div class="summary-item"><p class="section-label">CONFIRMED</p><p class="summary-number" id="count-confirmed">—</p></div>
+      <div class="summary-item"><p class="section-label">CANCELLED</p><p class="summary-number" id="count-cancelled">—</p></div>
+      <div class="summary-item"><p class="section-label">COMPLETED</p><p class="summary-number" id="count-completed">—</p></div>
+    </section>
+
+    <!-- Search and filter -->
+    <div class="toolbar">
+      <div>
+        <label for="searchInput" class="section-label" style="display:block;margin-bottom:6px">SEARCH</label>
+        <input type="search" id="searchInput" class="search-input" placeholder="SEARCH RESERVATIONS...">
+      </div>
+      <div>
+        <p class="section-label" style="margin-bottom:6px" id="filterLabel">FILTER BY STATUS</p>
+        <div class="filter-group" role="group" aria-labelledby="filterLabel" id="filterGroup">
+          <button type="button" class="filter-btn" data-status="All" aria-pressed="true">ALL</button>
+          <button type="button" class="filter-btn" data-status="Pending" aria-pressed="false">PENDING</button>
+          <button type="button" class="filter-btn" data-status="Confirmed" aria-pressed="false">CONFIRMED</button>
+          <button type="button" class="filter-btn" data-status="Cancelled" aria-pressed="false">CANCELLED</button>
+          <button type="button" class="filter-btn" data-status="Completed" aria-pressed="false">COMPLETED</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="mono muted" id="tableInfo" role="status" style="margin-bottom:12px"></p>
+
+    <div class="table-wrap">
+      <table class="res-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>CUSTOMER</th>
+            <th>STATION</th>
+            <th>DATE</th>
+            <th>TIME</th>
+            <th>DURATION</th>
+            <th>PLAYERS</th>
+            <th>PAYMENT</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <p class="empty-note hidden" id="emptyNote"></p>
+    </div>
+  </main>
+
+  <!-- Edit form (opens on top of the page) -->
+  <dialog id="editDialog" aria-labelledby="editTitle">
+    <div class="dialog-head">
+      <h2 class="mono" id="editTitle">EDIT RESERVATION</h2>
+      <button type="button" class="btn btn-outline btn-small" id="editClose">CLOSE</button>
+    </div>
+    <form class="dialog-body" id="editForm" novalidate>
+      <div class="form-grid" style="border-top:none;padding-top:0">
+        <div class="field">
+          <label for="e-name">Customer name</label>
+          <input type="text" id="e-name">
+        </div>
+        <div class="field">
+          <label for="e-contact">Contact number</label>
+          <input type="text" id="e-contact">
+        </div>
+        <div class="field full">
+          <label for="e-email">Email</label>
+          <input type="email" id="e-email">
+        </div>
+        <div class="field full">
+          <label for="e-station">Station</label>
+          <select id="e-station"></select>
+        </div>
+        <div class="field">
+          <label for="e-date">Date</label>
+          <input type="date" id="e-date">
+        </div>
+        <div class="field">
+          <label for="e-time">Start time</label>
+          <input type="time" id="e-time">
+        </div>
+        <div class="field">
+          <label for="e-duration">Duration (hours)</label>
+          <input type="number" id="e-duration" min="1" max="12">
+        </div>
+        <div class="field">
+          <label for="e-players">Players</label>
+          <input type="number" id="e-players" min="1" max="10">
+        </div>
+        <div class="field">
+          <label for="e-payment">Payment method</label>
+          <select id="e-payment">
+            <option value="Cash">Cash</option>
+            <option value="GCash">GCash</option>
+            <option value="Maya">Maya</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="e-status">Status</label>
+          <select id="e-status">
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <p class="form-message hidden" id="editMessage" role="alert"></p>
+        <div class="form-actions">
+          <button type="submit" class="btn">SAVE CHANGES</button>
+          <button type="button" class="btn btn-outline" id="editCancel">CANCEL</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
