@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reserve a Station — FRAME Gaming Café</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316181d'/%3E%3Cpath d='M9 8h14v4H13v4h8v4h-8v4H9z' fill='%23cbd0d8'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">FRAME</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navList">MENU</button>
+      <nav aria-label="Main">
+        <ul class="nav-list" id="navList">
+          <li><a href="index.html#home">01 HOME</a></li>
+          <li><a href="index.html#stations">02 STATIONS</a></li>
+          <li><a href="index.html#games">03 GAMES</a></li>
+          <li><a href="index.html#pricing">04 PRICING</a></li>
+          <li><a href="reservation.html" aria-current="page">05 RESERVE</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+
+    <div class="page-head">
+      <p class="section-label">05 — RESERVATION</p>
+      <h1 class="page-title">RESERVE A STATION.</h1>
+    </div>
+
+    <!-- The form -->
+    <form id="reservationForm" class="form-grid" novalidate>
+
+      <div class="field" id="field-name">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" autocomplete="name" aria-describedby="error-name">
+        <span class="error-text" id="error-name" role="alert"></span>
+      </div>
+
+      <div class="field" id="field-contact">
+        <label for="contact_number">Contact number</label>
+        <input type="tel" id="contact_number" name="contact_number" autocomplete="tel" aria-describedby="error-contact">
+        <span class="error-text" id="error-contact" role="alert"></span>
+      </div>
+
+      <div class="field full" id="field-email">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email" aria-describedby="error-email">
+        <span class="error-text" id="error-email" role="alert"></span>
+      </div>
+
+      <div class="field full" id="field-station">
+        <label for="station_id">Gaming station</label>
+        <select id="station_id" name="station_id" aria-describedby="error-station">
+          <option value="">Loading stations…</option>
+        </select>
+        <span class="error-text" id="error-station" role="alert"></span>
+      </div>
+
+      <div class="field" id="field-date">
+        <label for="reservation_date">Date</label>
+        <input type="date" id="reservation_date" name="reservation_date" aria-describedby="error-date">
+        <span class="error-text" id="error-date" role="alert"></span>
+      </div>
+
+      <div class="field" id="field-time">
+        <label for="start_time">Start time</label>
+        <input type="time" id="start_time" name="start_time" aria-describedby="error-time">
+        <span class="error-text" id="error-time" role="alert"></span>
+      </div>
+
+      <div class="field" id="field-duration">
+        <label for="duration">Duration</label>
+        <select id="duration" name="duration" aria-describedby="error-duration">
+          <option value="">Select hours</option>
+          <option value="1">1 hour</option>
+          <option value="2">2 hours</option>
+          <option value="3">3 hours</option>
+          <option value="4">4 hours</option>
+          <option value="5">5 hours</option>
+          <option value="6">6 hours</option>
+        </select>
+        <span class="error-text" id="error-duration" role="alert"></span>
+      </div>
+
+      <div class="field" id="field-players">
+        <label for="number_of_players">Number of players</label>
+        <input type="number" id="number_of_players" name="number_of_players" min="1" max="10" value="1" aria-describedby="error-players">
+        <span class="error-text" id="error-players" role="alert"></span>
+      </div>
+
+      <div class="field full" id="field-payment">
+        <label for="payment_method">Payment method</label>
+        <select id="payment_method" name="payment_method" aria-describedby="error-payment">
+          <option value="">Select payment method</option>
+          <option value="Cash">Cash (pay at the café)</option>
+          <option value="GCash">GCash</option>
+          <option value="Maya">Maya</option>
+        </select>
+        <span class="error-text" id="error-payment" role="alert"></span>
+      </div>
+
+      <p class="estimate" id="estimate">ESTIMATED TOTAL: —</p>
+
+      <p class="form-message hidden" id="formMessage" role="alert"></p>
+
+      <div class="form-actions">
+        <button type="submit" class="btn" id="submitBtn">[ CONFIRM RESERVATION <span class="arrow">→</span> ]</button>
+        <a class="btn btn-outline" href="index.html">CANCEL</a>
+      </div>
+    </form>
+
+    <!-- Shown after a successful reservation -->
+    <section class="confirmation hidden" id="confirmation" aria-live="polite">
+      <div class="confirmation-head">RESERVATION CONFIRMED</div>
+      <div class="confirmation-grid">
+        <div class="confirmation-item"><p class="section-label">RESERVATION</p><p class="value" id="c-id"></p></div>
+        <div class="confirmation-item"><p class="section-label">STATION</p><p class="value" id="c-station"></p></div>
+        <div class="confirmation-item"><p class="section-label">DATE</p><p class="value" id="c-date"></p></div>
+        <div class="confirmation-item"><p class="section-label">TIME</p><p class="value" id="c-time"></p></div>
+        <div class="confirmation-item"><p class="section-label">DURATION</p><p class="value" id="c-duration"></p></div>
+        <div class="confirmation-item"><p class="section-label">TOTAL</p><p class="value" id="c-total"></p></div>
+      </div>
+      <div class="confirmation-actions">
+        <button type="button" class="btn" id="newReservationBtn">[ MAKE ANOTHER RESERVATION <span class="arrow">→</span> ]</button>
+        <a class="btn btn-outline" href="index.html">BACK HOME</a>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/main.js"></script>
+  <script src="js/reservation.js"></script>
+</body>
+</html>

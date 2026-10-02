@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin — FRAME Gaming Café</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316181d'/%3E%3Cpath d='M9 8h14v4H13v4h8v4h-8v4H9z' fill='%23cbd0d8'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div class="admin-shell">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a class="brand" href="/admin">FRAME <span class="brand-sub">/ ADMIN</span></a>
+        <button class="nav-toggle" id="sideToggle" aria-expanded="false" aria-controls="sidePanel">MENU</button>
+      </div>
+
+      <div class="sidebar-panel" id="sidePanel">
+        <nav aria-label="Admin sections" class="side-nav">
+          <button type="button" data-section="overview" aria-current="page">OVERVIEW</button>
+          <button type="button" data-section="reservations">RESERVATIONS</button>
+          <button type="button" data-section="users" data-admin-only>USERS</button>
+          <button type="button" data-section="audit" data-admin-only>AUDIT LOG</button>
+        </nav>
+
+        <div class="sidebar-foot">
+          <p class="section-label">SIGNED IN AS</p>
+          <p class="mono" id="whoName">—</p>
+          <p class="mono muted" id="whoRole">—</p>
+          <p class="section-label" style="margin-top:16px">SESSION ENDS IN</p>
+          <p class="mono" id="sessionTimer">--:--</p>
+          <button type="button" class="btn btn-outline btn-small" id="logoutBtn" style="margin-top:16px;width:100%">SIGN OUT</button>
+          <a class="mono muted" href="/" style="display:block;margin-top:16px;font-size:12px">← VIEW WEBSITE</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== Main area ===== -->
+    <main class="admin-main" id="main">
+
+      <div class="form-message hidden" id="timeoutWarning" role="alert">
+        YOUR SESSION IS ABOUT TO EXPIRE.
+        <button type="button" class="btn btn-small" id="stayBtn" style="margin-left:12px">STAY SIGNED IN</button>
+      </div>
+
+      <!-- OVERVIEW -->
+      <section id="section-overview" class="admin-section">
+        <p class="section-label">01 — OVERVIEW</p>
+        <h1 class="admin-title">OVERVIEW.</h1>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <p class="section-label">TOTAL USERS</p>
+            <p class="metric-number" id="m-users">—</p>
+            <p class="mono muted metric-sub">ADMIN + STAFF ACCOUNTS</p>
+          </div>
+          <div class="metric-card">
+            <p class="section-label">RESERVATIONS</p>
+            <p class="metric-number" id="m-reservations">—</p>
+            <p class="mono muted metric-sub">ALL TIME</p>
+          </div>
+          <div class="metric-card">
+            <p class="section-label">PENDING</p>
+            <p class="metric-number" id="m-pending">—</p>
+            <p class="mono muted metric-sub">WAITING FOR CONFIRMATION</p>
+          </div>
+          <div class="metric-card">
+            <p class="section-label">SYSTEM STATUS</p>
+            <p class="metric-number metric-text"><span class="status-dot" id="m-dot"></span><span id="m-status">—</span></p>
+            <p class="mono muted metric-sub" id="m-status-sub">DATABASE</p>
+          </div>
+        </div>
+
+        <h2 class="sub-title">RECENT RESERVATIONS</h2>
+        <div class="table-wrap">
+          <table class="res-table">
+            <thead><tr><th>ID</th><th>CUSTOMER</th><th>STATION</th><th>DATE</th><th>STATUS</th></tr></thead>
+            <tbody id="recentBody"></tbody>
+          </table>
+          <p class="empty-note hidden" id="recentEmpty">No reservations yet.</p>
+        </div>
+      </section>
+
+      <!-- RESERVATIONS -->
+      <section id="section-reservations" class="admin-section hidden">
+        <p class="section-label">02 — RESERVATIONS</p>
+        <h1 class="admin-title">RESERVATIONS.</h1>
+
+        <div class="admin-summary" aria-label="Reservation summary">
+          <div class="summary-item"><p class="section-label">TOTAL</p><p class="summary-number" id="count-total">—</p></div>
+          <div class="summary-item"><p class="section-label">PENDING</p><p class="summary-number" id="count-pending">—</p></div>
+          <div class="summary-item"><p class="section-label">CONFIRMED</p><p class="summary-number" id="count-confirmed">—</p></div>
+          <div class="summary-item"><p class="section-label">CANCELLED</p><p class="summary-number" id="count-cancelled">—</p></div>
+          <div class="summary-item"><p class="section-label">COMPLETED</p><p class="summary-number" id="count-completed">—</p></div>
+        </div>
+
+        <div class="toolbar">
+          <div>
+            <label for="searchInput" class="section-label" style="display:block;margin-bottom:6px">SEARCH</label>
+            <input type="search" id="searchInput" class="search-input" placeholder="SEARCH RESERVATIONS...">
+          </div>
+          <div>
+            <p class="section-label" style="margin-bottom:6px" id="filterLabel">FILTER BY STATUS</p>
+            <div class="filter-group" role="group" aria-labelledby="filterLabel" id="filterGroup">
+              <button type="button" class="filter-btn" data-status="All" aria-pressed="true">ALL</button>
+              <button type="button" class="filter-btn" data-status="Pending" aria-pressed="false">PENDING</button>
+              <button type="button" class="filter-btn" data-status="Confirmed" aria-pressed="false">CONFIRMED</button>
+              <button type="button" class="filter-btn" data-status="Cancelled" aria-pressed="false">CANCELLED</button>
+              <button type="button" class="filter-btn" data-status="Completed" aria-pressed="false">COMPLETED</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="res-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>CUSTOMER</th><th>STATION</th><th>DATE</th><th>TIME</th>
+                <th>DURATION</th><th>PLAYERS</th><th>PAYMENT</th><th>STATUS</th><th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <p class="empty-note hidden" id="emptyNote"></p>
+        </div>
+        <div class="pager" id="resPager"></div>
+      </section>
+
+      <!-- USERS (admin only) -->
+      <section id="section-users" class="admin-section hidden">
+        <p class="section-label">03 — USERS</p>
+        <h1 class="admin-title">USERS.</h1>
+        <div class="toolbar">
+          <div>
+            <label for="userSearch" class="section-label" style="display:block;margin-bottom:6px">SEARCH</label>
+            <input type="search" id="userSearch" class="search-input" placeholder="SEARCH USERS...">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="res-table">
+            <thead><tr><th>ID</th><th>USERNAME</th><th>ROLE</th><th>CREATED</th><th>LAST LOGIN</th></tr></thead>
+            <tbody id="userBody"></tbody>
+          </table>
+          <p class="empty-note hidden" id="userEmpty"></p>
+        </div>
+        <div class="pager" id="userPager"></div>
+      </section>
+
+      <!-- AUDIT LOG (admin only) -->
+      <section id="section-audit" class="admin-section hidden">
+        <p class="section-label">04 — AUDIT LOG</p>
+        <h1 class="admin-title">AUDIT LOG.</h1>
+        <div class="toolbar">
+          <div>
+            <label for="auditSearch" class="section-label" style="display:block;margin-bottom:6px">SEARCH</label>
+            <input type="search" id="auditSearch" class="search-input" placeholder="SEARCH USER, ACTION, DETAILS...">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="res-table">
+            <thead><tr><th>TIME</th><th>USER</th><th>ACTION</th><th>DETAILS</th><th>IP</th></tr></thead>
+            <tbody id="auditBody"></tbody>
+          </table>
+          <p class="empty-note hidden" id="auditEmpty"></p>
+        </div>
+        <div class="pager" id="auditPager"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Edit dialog -->
+  <dialog id="editDialog" aria-labelledby="editTitle">
+    <div class="dialog-head">
+      <h2 class="mono" id="editTitle">EDIT RESERVATION</h2>
+      <button type="button" class="btn btn-outline btn-small" id="editClose">CLOSE</button>
+    </div>
+    <form class="dialog-body" id="editForm" novalidate>
+      <div class="form-grid" style="border-top:none;padding-top:0">
+        <div class="field"><label for="e-name">Customer name</label><input type="text" id="e-name"></div>
+        <div class="field"><label for="e-contact">Contact number</label><input type="text" id="e-contact"></div>
+        <div class="field full"><label for="e-email">Email</label><input type="email" id="e-email"></div>
+        <div class="field full"><label for="e-station">Station</label><select id="e-station"></select></div>
+        <div class="field"><label for="e-date">Date</label><input type="date" id="e-date"></div>
+        <div class="field"><label for="e-time">Start time</label><input type="time" id="e-time"></div>
+        <div class="field"><label for="e-duration">Duration (hours)</label><input type="number" id="e-duration" min="1" max="12"></div>
+        <div class="field"><label for="e-players">Players</label><input type="number" id="e-players" min="1" max="10"></div>
+        <div class="field">
+          <label for="e-payment">Payment method</label>
+          <select id="e-payment">
+            <option value="Cash">Cash</option>
+            <option value="GCash">GCash</option>
+            <option value="Maya">Maya</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="e-status">Status</label>
+          <select id="e-status">
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+        <p class="form-message hidden" id="editMessage" role="alert"></p>
+        <div class="form-actions">
+          <button type="submit" class="btn">SAVE CHANGES</button>
+          <button type="button" class="btn btn-outline" id="editCancel">CANCEL</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

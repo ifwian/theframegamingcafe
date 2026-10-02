@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FRAME Gaming Café — Reserve. Play. Repeat.</title>
+  <meta name="description" content="FRAME is a gaming café where you can reserve a PC, PlayStation 5 or VIP room by the hour.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316181d'/%3E%3Cpath d='M9 8h14v4H13v4h8v4h-8v4H9z' fill='%23cbd0d8'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">FRAME</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navList">MENU</button>
+      <nav aria-label="Main">
+        <ul class="nav-list" id="navList">
+          <li><a href="#home">01 HOME</a></li>
+          <li><a href="#stations">02 STATIONS</a></li>
+          <li><a href="#games">03 GAMES</a></li>
+          <li><a href="#pricing">04 PRICING</a></li>
+          <li><a href="reservation.html">05 RESERVE</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- HOME -->
+    <section class="hero" id="home">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <p class="hero-name">FRAME<br>GAMING CAFÉ</p>
+            <h1 class="hero-title">RESERVE.<br>PLAY.<br>REPEAT.</h1>
+            <p class="hero-text">A focused gaming space for casual sessions, competitive matches, and everything in between.</p>
+            <a class="btn" href="reservation.html">[ RESERVE A STATION <span class="arrow">→</span> ]</a>
+          </div>
+          <figure class="hero-visual">
+            <div class="image-frame" role="img" aria-label="Image placeholder: photo of the gaming area at FRAME Gaming Café">
+              <!-- Put your photo at public/assets/images/hero.jpg (4:3). It covers this placeholder automatically. -->
+              <img src="assets/images/hero.jpg" alt="" onerror="this.remove()">
+              <div class="image-placeholder">
+                <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect x="6" y="10" width="52" height="44"/>
+                  <circle cx="22" cy="26" r="5"/>
+                  <path d="M6 46 L24 32 L36 42 L44 36 L58 48"/>
+                </svg>
+                <p class="mono">IMAGE PLACEHOLDER</p>
+                <p class="mono muted">GAMING AREA PHOTO — 4:3</p>
+                <p class="mono muted">assets/images/hero.jpg</p>
+              </div>
+            </div>
+            <figcaption class="mono muted">FIG. 01 — THE GAMING AREA</figcaption>
+          </figure>
+        </div>
+
+        <div class="meta-row">
+          <div class="meta-item">
+            <p class="section-label">LOCATION</p>
+            <p class="meta-value">CALAMBA, PH</p>
+          </div>
+          <div class="meta-item">
+            <p class="section-label">OPEN</p>
+            <p class="meta-value">10:00 — 02:00</p>
+          </div>
+          <div class="meta-item">
+            <p class="section-label">STATIONS</p>
+            <p class="meta-value" id="stationCount">05</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">01 — ABOUT</p>
+          <h2 class="section-title">A PLACE TO PLAY.</h2>
+          <p class="about-text">FRAME is a fictional gaming café designed for players who want a focused and comfortable space to play, compete, and spend time with friends.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATIONS (loaded from MySQL by main.js) -->
+    <section class="section" id="stations">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">02 — STATIONS</p>
+          <h2 class="section-title">CHOOSE YOUR SEAT.</h2>
+        </div>
+        <div class="row-list" id="stationList">
+          <p class="empty-note">Loading stations…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMES -->
+    <section class="section" id="games">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">03 — GAMES</p>
+          <h2 class="section-title">WHAT WE PLAY.</h2>
+        </div>
+        <ul class="games-list">
+          <li><span class="mono">01</span>VALORANT</li>
+          <li><span class="mono">02</span>COUNTER-STRIKE 2</li>
+          <li><span class="mono">03</span>LEAGUE OF LEGENDS</li>
+          <li><span class="mono">04</span>DOTA 2</li>
+          <li><span class="mono">05</span>MINECRAFT</li>
+          <li><span class="mono">06</span>GTA V</li>
+          <li><span class="mono">07</span>FORTNITE</li>
+          <li><span class="mono">08</span>ROBLOX</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PRICING (built from the same station data) -->
+    <section class="section" id="pricing">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">04 — PRICING</p>
+          <h2 class="section-title">PAY BY THE HOUR.</h2>
+        </div>
+        <div class="pricing-grid" id="pricingGrid">
+          <p class="empty-note">Loading prices…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="section-head">
+          <p class="section-label">05 — CONTACT</p>
+          <h2 class="section-title">FIND US.</h2>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <p class="section-label">ADDRESS</p>
+            <p>Sample Street, Calamba, Laguna</p>
+          </div>
+          <div class="contact-item">
+            <p class="section-label">EMAIL</p>
+            <p>hello@frame-demo.ph</p>
+          </div>
+          <div class="contact-item">
+            <p class="section-label">PHONE</p>
+            <p>0900 000 0000</p>
+          </div>
+        </div>
+        <p class="mono muted" style="margin-top:24px">Sample details for a school project.</p>
+      </div>
+    </section>
+
+    <!-- RESERVE -->
+    <section class="reserve-band" id="reserve">
+      <div class="container">
+        <p class="section-label">06 — RESERVE</p>
+        <h2>YOUR SEAT IS<br>WAITING.</h2>
+        <a class="btn" href="reservation.html">[ RESERVE A STATION <span class="arrow">→</span> ]</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner mono">
+      <span>FRAME GAMING CAFÉ — RESERVE. PLAY. REPEAT.</span>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

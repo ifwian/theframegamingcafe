@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Sign In — FRAME Gaming Café</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316181d'/%3E%3Cpath d='M9 8h14v4H13v4h8v4h-8v4H9z' fill='%23cbd0d8'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+  <main class="login-card" id="main">
+    <p class="section-label">FRAME / ADMIN</p>
+    <h1 class="login-title">SIGN IN.</h1>
+    <p class="muted login-note">Staff and administrators only.</p>
+
+    <p class="form-message hidden" id="loginMessage" role="alert"></p>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" autocomplete="username" autofocus>
+      </div>
+      <div class="field" style="margin-top:20px">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password">
+      </div>
+      <div class="form-actions" style="margin-top:28px">
+        <button type="submit" class="btn" id="loginBtn">[ SIGN IN <span class="arrow">→</span> ]</button>
+      </div>
+    </form>
+
+    <p class="mono muted login-back"><a href="/">← BACK TO WEBSITE</a></p>
+  </main>
+
+  <script>
+    var form = document.getElementById("loginForm");
+    var message = document.getElementById("loginMessage");
+    var button = document.getElementById("loginBtn");
+
+    function showMessage(text) {
+      message.textContent = text;
+      message.classList.remove("hidden");
+    }
+
+    // Sent here by the server because the session timed out
+    if (new URLSearchParams(window.location.search).get("expired")) {
+      showMessage("YOUR SESSION EXPIRED. PLEASE SIGN IN AGAIN.");
+    }
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      message.classList.add("hidden");
+
+      var username = document.getElementById("username").value;
+      var password = document.getElementById("password").value;
+      if (username.trim() === "" || password === "") {
+        showMessage("Enter your username and password.");
+        return;
+      }
+
+      button.disabled = true;
+      try {
+        var response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: username, password: password })
+        });
+        var result = await response.json();
+        if (!response.ok) {
+          showMessage(result.error);
+          button.disabled = false;
+          return;
+        }
+        window.location = "/admin";
+      } catch (error) {
+        showMessage("Could not reach the server.");
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
