@@ -1,3 +1,57 @@
-node_modules/
+# ---- Secrets (NEVER commit) ----
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_ed25519
+secrets.json
+credentials.json
+service-account*.json
+
+# ---- Old Node/Express backend (moved to js/store.js) ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+server.js
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
 *.log
+
+# ---- MySQL artifacts ----
+database.sql
+*.sql
+*.sqlite
+*.sqlite3
+dump.sql
+
+# ---- Archived copies of this project ----
+frame-gaming-cafe/
+legacy/
+legacy-backend/
+private/
+
+# ---- Local OS / editor cruft ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+*~
+
+# ---- Local deployment config ----
+.vercel/
+.netlify/
+.env.local
+.env.*.local

@@ -1,5 +1,5 @@
 // FRAME Gaming Cafe - reservation.js
-// Flow: form -> validate -> fetch(POST /reservations) -> Express -> MySQL
+// Flow: form -> validate -> Store.create() -> LocalStorage -> confirmation screen
 
 var form = document.getElementById("reservationForm");
 var stationSelect = document.getElementById("station_id");
@@ -10,7 +10,7 @@ var formMessage = document.getElementById("formMessage");
 var submitBtn = document.getElementById("submitBtn");
 var confirmation = document.getElementById("confirmation");
 
-var stations = []; // filled from MySQL
+var stations = []; // filled from the local data store
 
 var MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -40,36 +40,33 @@ function findStation(id) {
   return null;
 }
 
-// ---------- Load stations from MySQL ----------
-async function loadStations() {
+// ---------- Load stations from the local data store ----------
+function loadStations() {
   try {
-    var response = await fetch("/stations");
-    stations = await response.json();
-    if (!response.ok) {
-      throw new Error("Server error");
-    }
-
-    var html = '<option value="">Select a station</option>';
-    for (var i = 0; i < stations.length; i++) {
-      var s = stations[i];
-      if (s.status !== "Available") {
-        continue;
-      }
-      html += '<option value="' + s.station_id + '">' + s.station_name + " — " +
-              s.station_type + " (₱" + s.price_per_hour + "/hr)</option>";
-    }
-    stationSelect.innerHTML = html;
-
-    // If the user clicked a station on the landing page, pick it
-    var chosen = new URLSearchParams(window.location.search).get("station");
-    if (chosen) {
-      stationSelect.value = chosen;
-    }
-    updateEstimate();
+    stations = Store.stations();
   } catch (error) {
     stationSelect.innerHTML = '<option value="">Stations unavailable</option>';
-    showMessage("Could not load stations. Make sure the server and MySQL are running.");
+    showMessage("Could not load stations. Try refreshing the page.");
+    return;
   }
+
+  var html = '<option value="">Select a station</option>';
+  for (var i = 0; i < stations.length; i++) {
+    var s = stations[i];
+    if (s.status !== "Available") {
+      continue;
+    }
+    html += '<option value="' + s.station_id + '">' + s.station_name + " — " +
+            s.station_type + " (₱" + s.price_per_hour + "/hr)</option>";
+  }
+  stationSelect.innerHTML = html;
+
+  // If the user clicked a station on the landing page, pick it
+  var chosen = new URLSearchParams(window.location.search).get("station");
+  if (chosen) {
+    stationSelect.value = chosen;
+  }
+  updateEstimate();
 }
 
 // Earliest selectable date is today
@@ -160,7 +157,7 @@ function validateForm() {
 }
 
 // ---------- Submit (CREATE) ----------
-form.addEventListener("submit", async function (event) {
+form.addEventListener("submit", function (event) {
   event.preventDefault();
   hideMessage();
 
@@ -183,23 +180,11 @@ form.addEventListener("submit", async function (event) {
   submitBtn.disabled = true;
 
   try {
-    var response = await fetch("/reservations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    var result = await response.json();
-
-    if (!response.ok) {
-      // For example the double-booking message (409)
-      showMessage(result.error);
-      submitBtn.disabled = false;
-      return;
-    }
-
-    showConfirmation(result);
+    showConfirmation(Store.create(data));
   } catch (error) {
-    showMessage("Could not reach the server. Make sure it is running.");
+    // Validation problems (400) and the double-booking message (409)
+    // both arrive here as error.message.
+    showMessage(error.message || "Could not save the reservation.");
   }
 
   submitBtn.disabled = false;

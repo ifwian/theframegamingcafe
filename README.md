@@ -1,165 +1,252 @@
-# FRAME Gaming Café
+# FRAME Gaming Cafe
 
 **RESERVE. PLAY. REPEAT.**
 
-A reservation system for a fictional gaming café. Customers reserve a gaming station; an admin page lets staff view, edit and delete reservations. Built for a Web Design subject to demonstrate **CREATE → READ → UPDATE → DELETE**.
+A reservation system for a fictional gaming cafe. Customers book a gaming station;
+the admin page lets staff view, edit and delete bookings.
 
-## 1. Features
+Pure **HTML + CSS + vanilla JavaScript**. No build step, no dependencies,
+no server. It is a static site, so it can be deployed for free on Vercel,
+GitHub Pages or Netlify.
 
-- Landing page: home, about, stations, games, pricing, contact, reserve
-- Stations and prices are loaded from MySQL (not typed twice)
-- Reservation form with validation and a confirmation screen (the ID comes from MySQL)
-- Admin page: live counts, table, search, status filter, edit form, delete with confirmation
-- Double-booking protection (same station + same date + same start time)
-- Responsive (desktop, tablet, mobile), black-and-white design system (see `DESIGN.md`)
+Built to demonstrate **CREATE / READ / UPDATE / DELETE**.
 
-## 2. Technologies
+---
 
-HTML5, CSS3, vanilla JavaScript, Node.js, Express.js, MySQL (MySQL Workbench), VS Code.
+## 1. Quick start
 
-The idea in one picture:
+You do not need to install anything.
+
+**Option A — open it directly**
 
 ```text
-HTML  ->  JavaScript  ->  fetch()  ->  Express.js  ->  MySQL
+double-click index.html
 ```
 
-### npm packages (and why)
+**Option B — serve it locally** (recommended, matches how Vercel serves it)
 
-| Package | Used for |
-|---|---|
-| `express` | The web server and the API routes |
-| `mysql2` | Talking to MySQL from Node.js |
-| `cors` | Allows the browser to call the API |
-| `dotenv` | Reads the database password from the `.env` file |
+```bash
+npx serve .
+# or
+python -m http.server 8000
+```
 
-## 3. Folder structure
+Then open <http://localhost:8000>.
+
+> Use a local server rather than double-clicking. `file://` can behave oddly in
+> some browsers, and a local server matches the production environment.
+
+---
+
+## 2. Folder structure
 
 ```text
 frame-gaming-cafe/
-├── public/
-│   ├── index.html          landing page
-│   ├── reservation.html    reservation form
-│   ├── admin.html          admin page
-│   ├── css/style.css       all styles
-│   ├── js/main.js          landing page + mobile menu
-│   ├── js/reservation.js   form validation + CREATE
-│   ├── js/admin.js         READ, UPDATE, DELETE, search, filter, counts
-│   └── assets/images/
-├── server.js               Express server + API routes
-├── database.sql            creates the database and tables
-├── package.json
-├── .env.example            copy to .env
-├── .gitignore
-├── DESIGN.md
-└── README.md
+|-- index.html            Landing page (home, stations, games, pricing, contact)
+|-- reservation.html      Booking form  -> CREATE
+|-- admin.html            Admin table   -> READ / UPDATE / DELETE
+|-- vercel.json           Deployment + security header config
+|-- .gitignore
+|-- README.md             This file
+|-- DESIGN.md             Design system notes
+|
+|-- css/
+|   `-- style.css         All styles (single stylesheet)
+|
+|-- js/
+|   |-- data.js           Reference data: the station list
+|   |-- store.js          The "database" -> all CRUD lives here
+|   |-- main.js           Landing page + mobile menu
+|   |-- reservation.js    Form validation + CREATE
+|   `-- admin.js          READ, UPDATE, DELETE, search, filter, counts
+|
+`-- assets/
+    `-- images/           Images and icons
 ```
 
-## 4. Database setup
+Load order matters: `data.js` defines the seed data, `store.js` consumes it,
+then the page script runs. Every page includes them in that order.
 
-1. Open **MySQL Workbench** and connect to your local server.
-2. Choose **File → Open SQL Script…** and select `database.sql`.
-3. Click the **lightning bolt** (Execute).
-4. In the left panel, click refresh. You should see the `frame_gaming_cafe` database with `customers`, `stations` and `reservations`.
+---
 
-Relationship: a customer can have many reservations, and a station can appear in many reservations.
+## 3. How the CRUD works now
+
+The original version used Node.js, Express and MySQL. That version cannot run
+on a static host, so the database was replaced with a **client-side data store
+built on LocalStorage**.
+
+The entire backend now lives in **one file: `js/store.js`**. The page scripts
+never talk to a server — they call the store directly and synchronously.
 
 ```text
-customers (customer_id) ──┐
-                          ├──> reservations
-stations  (station_id)  ──┘
+HTML  ->  JavaScript  ->  Store.create()  ->  localStorage
 ```
 
-> Running `database.sql` again deletes and recreates the tables (all reservations are erased).
+### The store API
 
-## 5. Installation
+`js/store.js` exposes a global `Store` object. Each method returns the same JSON
+shape the old API returned, so the pages read records identically.
 
-Install **Node.js** (LTS) from https://nodejs.org and **MySQL Community Server + Workbench** from https://dev.mysql.com/downloads/. Then:
+| Method | Does | Replaces |
+|---|---|---|
+| `Store.stations()` | List stations | `GET /stations` |
+| `Store.list()` | List all reservations, newest first | `GET /reservations` |
+| `Store.get(id)` | Get one reservation | `GET /reservations/:id` |
+| `Store.create(data)` | Create a reservation | `POST /reservations` |
+| `Store.update(id, data)` | Update a reservation | `PUT /reservations/:id` |
+| `Store.remove(id)` | Delete a reservation | `DELETE /reservations/:id` |
+| `Store.isDoubleBooked(...)` | Check a slot | internal `isDoubleBooked()` |
+| `Store.reset()` | Restore the demo data | (new, useful for demos) |
 
-```bash
-cd frame-gaming-cafe
-npm install
-```
+### CRUD mapping
 
-## 6. `.env` setup
+| Letter | Page | Call | What is stored |
+|---|---|---|---|
+| **C**reate | `reservation.html` | `Store.create(data)` | Appends a record, assigns the next ID |
+| **R**ead | `admin.html` | `Store.list()` | Loads all records into the table |
+| **U**pdate | `admin.html` EDIT | `Store.update(id, data)` | Replaces the record, same ID |
+| **D**elete | `admin.html` DELETE | `Store.remove(id)` | Removes the record |
 
-Copy `.env.example` to a new file named `.env` and write your own MySQL password:
+### Business rules kept from the backend
 
-```text
-PORT=3000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=YOUR_PASSWORD
-DB_NAME=frame_gaming_cafe
-```
+These did not get dropped in the port. They are enforced in `js/store.js`:
 
-The `.env` file is ignored by Git, so your password is never uploaded.
+- **Field validation** — name, contact, email, station, date, start time,
+  duration, players and payment method are all required (returns status `400`).
+- **Double-booking protection** — the same station cannot be booked twice for
+  the same date and start time (returns status `409`).
+- **Cancelled rows free their slot** — a cancelled booking is ignored by the
+  conflict check.
+- **Status whitelist** — only `Pending`, `Confirmed`, `Cancelled`, `Completed`.
+- **Station JOIN** — `store.js` attaches `station_name`, `station_type` and
+  `price_per_hour` to each record, which is what the old SQL `JOIN` did. Names
+  are stored once, not typed twice.
+- **Type coercion** — the form gives strings, so `duration` and
+  `number_of_players` are converted to numbers and `start_time` is padded to
+  `HH:MM:SS`, exactly as MySQL returned them.
 
-## 7. Running locally
+Errors are thrown as `Error` objects carrying `.status` (`400`, `404`, `409`),
+so the pages read `error.message` just as they used to read `result.error`.
 
-```bash
-npm start
-```
+### LocalStorage keys
 
-You should see `FRAME server running at http://localhost:3000` and `MySQL connected.`
-
-| Page | URL |
+| Key | Contents |
 |---|---|
-| Landing page | http://localhost:3000/ |
-| Reservation form | http://localhost:3000/reservation.html |
-| Admin | http://localhost:3000/admin.html |
+| `frame.stations` | Station list (reference data) |
+| `frame.reservations` | All bookings |
+| `frame.nextReservationId` | Next ID to hand out |
+| `frame.initialised` | Set once, prevents re-seeding |
 
-## 8. API routes
+To wipe everything and start clean, run this in the browser console:
 
-| Method | Route | What it does |
-|---|---|---|
-| GET | `/stations` | List all stations |
-| GET | `/reservations` | List all reservations |
-| GET | `/reservations/:id` | Get one reservation |
-| POST | `/reservations` | Create a reservation |
-| PUT | `/reservations/:id` | Update a reservation |
-| DELETE | `/reservations/:id` | Delete a reservation |
-
-## 9. CRUD explained
-
-| Letter | Where | Flow |
-|---|---|---|
-| **C**reate | `reservation.html` | form → `fetch(POST)` → Express → `INSERT` into `customers` and `reservations` |
-| **R**ead | `admin.html` | `fetch(GET)` → Express → `SELECT` (joined) → JSON → HTML table |
-| **U**pdate | admin → EDIT | form → `fetch(PUT)` → Express → `UPDATE` → table refreshes |
-| **D**elete | admin → DELETE | confirm → `fetch(DELETE)` → Express → `DELETE` → table refreshes |
-
-Double booking: before saving, `server.js` runs a `SELECT` for the same station + date + start time (ignoring cancelled reservations). If one exists, it answers with status 409 and the message is shown to the user.
-
-## 10. Testing checklist
-
-1. Open `/reservation.html`, press the button with an empty form → error messages appear.
-2. Fill the form and submit → confirmation with a reservation number.
-3. Check MySQL Workbench: `SELECT * FROM reservations;` shows the new row.
-4. Submit the same station + date + time again → "THIS STATION IS ALREADY RESERVED…".
-5. Open `/admin.html` → the reservation is in the table; counts match.
-6. Click **EDIT**, change the status to Confirmed, save → counts and MySQL change.
-7. Try search (name, ID, station) and the status filters.
-8. Click **DELETE**, confirm → row disappears and is gone from MySQL.
-9. Resize the browser to phone width.
-
-## 11. GitHub
-
-```bash
-git init
-git add .
-git commit -m "FRAME Gaming Cafe"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/frame-gaming-cafe.git
-git push -u origin main
+```js
+localStorage.clear();
 ```
 
-Before pushing, check that `.env` does not appear in `git status` (it should be ignored).
+Or call `Store.reset()` to put the three demo bookings back.
 
-## Troubleshooting
+---
 
-- **`MySQL connection FAILED`**: check `DB_PASSWORD` in `.env`, make sure MySQL is running, and that `database.sql` was executed.
-- **`ER_NOT_SUPPORTED_AUTH_MODE` / auth error on MySQL 8**: run in Workbench: `ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'YOUR_PASSWORD';` then `FLUSH PRIVILEGES;`
-- **Port already in use**: change `PORT` in `.env`.
-- **Stations do not load**: open the site through `http://localhost:3000`, not by double-clicking the HTML files.
+## 4. Important limitations
 
-> Café name, address, phone and email are sample content for a school project.
+Please state these honestly in your write-up. They are inherent to a
+browser-only design, not bugs.
+
+1. **Data is per-browser.** Bookings are saved in the visitor's own browser. A
+   booking made in Chrome is not visible in Firefox or on another computer.
+   There is no shared database.
+2. **Data is not permanent.** Clearing cookies, browsing data or site data
+   deletes every booking. Always export or screenshot anything important.
+3. **No real security.** `admin.html` is a normal public page — anyone can open
+   it and delete records. Hiding a page in JavaScript is *not* access control,
+   because the browser still has to download the page and the code. Genuine
+   authentication needs a real backend.
+4. **Not suitable for production.** A real cafe would need a server and database.
+
+---
+
+## 5. Deploying to Vercel
+
+1. Push the project to GitHub.
+2. Go to [vercel.com](https://vercel.com) and import the repository.
+3. Vercel detects a static site automatically — **Framework Preset: Other**,
+   **Build Command: leave empty**, **Output Directory: `.`**.
+4. Click **Deploy**.
+
+That is the whole process. `vercel.json` already sets `cleanUrls` and adds
+security headers.
+
+### Deploying to GitHub Pages instead
+
+Settings → Pages → Source: deploy from a branch → branch `main`, folder
+`/ (root)`. The site is then served from
+`https://<user>.github.io/<repo>/`.
+
+> Relative paths (`css/style.css`, `js/store.js`) are used throughout, so the
+> project works from a subdirectory without changes.
+
+---
+
+## 6. Testing checklist
+
+1. Open `index.html` — the station list and pricing cards load.
+2. Open `reservation.html` and submit an empty form — field errors appear.
+3. Fill the form and submit — the confirmation screen shows an ID.
+4. Repeat the same station, date and time — "THIS STATION IS ALREADY RESERVED".
+5. Open `admin.html` — the booking is listed and the counts match.
+6. Click **EDIT**, set the status to `Confirmed`, save — the badge and counts update.
+7. Filter by status, and search by name, ID and station.
+8. Click **DELETE**, confirm — the row disappears.
+9. Reload the page — your changes are still there (LocalStorage).
+10. Resize the browser to phone width.
+
+---
+
+## 7. Security notes for this repository
+
+Handled:
+
+- `.env` files, `*.sql`, `node_modules/` and local backups are git-ignored and
+  are not part of the repository.
+- The old Express server, `database.sql`, `package.json` and a stray nested copy
+  of the project were removed from the tracked tree.
+- Security headers are set in `vercel.json`.
+
+**Action required — a leaked password.** An earlier commit of this repository
+contained a real MySQL password inside `.env.example`
+(commit `31d447b`). Because the repository was pushed to a public GitHub
+repository, that password should be treated as public.
+
+1. **Change the MySQL password** — this is the important one:
+
+   ```sql
+   ALTER USER 'root'@'localhost' IDENTIFIED BY 'a_new_password';
+   FLUSH PRIVILEGES;
+   ```
+
+2. Optionally purge it from history with
+   [git-filter-repo](https://github.com/newren/git-filter-repo), then force-push.
+   This rewrites commit hashes, so do it only if you are comfortable with that.
+
+Even after rewriting history, rotate the password first. Rotation alone is
+enough for a local school database.
+
+---
+
+## 8. What changed from the original Node.js version
+
+| Before | Now |
+|---|---|
+| `server.js` (Express routes) | removed |
+| MySQL via `mysql2` | removed |
+| `fetch("/reservations")` | `Store.list()` |
+| `fetch("/stations")` | `Store.stations()` |
+| `database.sql` | `js/data.js` (stations only) |
+| `cors`, `dotenv`, `express` deps | none |
+| `.env` for DB credentials | none — no secrets in the client |
+
+The design system, page layouts and styling are unchanged.
+
+---
+
+> The cafe name, address, phone and email are sample content for a school project.

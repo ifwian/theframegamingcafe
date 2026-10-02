@@ -20,7 +20,7 @@ if (navToggle && navList) {
   });
 }
 
-// ---------- Stations + pricing (from MySQL through GET /stations) ----------
+// ---------- Stations + pricing (read from the local data store) ----------
 var stationList = document.getElementById("stationList");
 var pricingGrid = document.getElementById("pricingGrid");
 
@@ -76,21 +76,17 @@ function showPricing(stations) {
   pricingGrid.innerHTML = html;
 }
 
-async function loadStations() {
+function loadStations() {
   if (!stationList) {
     return; // not the landing page
   }
   try {
-    var response = await fetch("/stations");
-    var stations = await response.json();
-    if (!response.ok) {
-      throw new Error("Server error");
-    }
+    var stations = Store.stations();
     showStations(stations);
     showPricing(stations);
     document.getElementById("stationCount").textContent = twoDigits(stations.length);
   } catch (error) {
-    var note = '<p class="empty-note">Stations could not be loaded. Is the server running and MySQL connected?</p>';
+    var note = '<p class="empty-note">Stations could not be loaded. Try refreshing the page.</p>';
     stationList.innerHTML = note;
     pricingGrid.innerHTML = note;
   }

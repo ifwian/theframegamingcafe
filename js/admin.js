@@ -1,7 +1,7 @@
 // FRAME Gaming Cafe - admin.js
-// READ   : GET    /reservations
-// UPDATE : PUT    /reservations/:id
-// DELETE : DELETE /reservations/:id
+// READ   : Store.list()
+// UPDATE : Store.update()
+// DELETE : Store.remove()
 
 var tableBody = document.getElementById("tableBody");
 var tableInfo = document.getElementById("tableInfo");
@@ -13,7 +13,7 @@ var editDialog = document.getElementById("editDialog");
 var editForm = document.getElementById("editForm");
 var editMessage = document.getElementById("editMessage");
 
-var allReservations = [];   // everything from MySQL
+var allReservations = [];   // every stored reservation
 var stations = [];          // for the edit dropdown
 var currentFilter = "All";  // status filter
 var editingId = null;       // which reservation is being edited
@@ -42,37 +42,32 @@ function safe(text) {
 }
 
 // ---------- READ ----------
-async function loadReservations() {
+function loadReservations() {
   try {
-    var response = await fetch("/reservations");
-    var data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error);
-    }
-    allReservations = data;
+    allReservations = Store.list();
     updateCounts();
     showTable();
   } catch (error) {
     tableBody.innerHTML = "";
     tableInfo.textContent = "";
-    emptyNote.textContent = "Could not load reservations. Make sure the server and MySQL are running.";
+    emptyNote.textContent = "Could not load reservations. Try refreshing the page.";
     emptyNote.classList.remove("hidden");
   }
 }
 
-async function loadStations() {
+function loadStations() {
   try {
-    var response = await fetch("/stations");
-    stations = await response.json();
-    var html = "";
-    for (var i = 0; i < stations.length; i++) {
-      html += '<option value="' + stations[i].station_id + '">' +
-              stations[i].station_name + " — " + stations[i].station_type + "</option>";
-    }
-    document.getElementById("e-station").innerHTML = html;
+    stations = Store.stations();
   } catch (error) {
-    console.log("Could not load stations", error);
+    return;
   }
+
+  var html = "";
+  for (var i = 0; i < stations.length; i++) {
+    html += '<option value="' + stations[i].station_id + '">' +
+            stations[i].station_name + " — " + stations[i].station_type + "</option>";
+  }
+  document.getElementById("e-station").innerHTML = html;
 }
 
 // ---------- Dashboard counts (calculated from the real data) ----------
@@ -240,7 +235,7 @@ function closeEdit() {
 document.getElementById("editClose").addEventListener("click", closeEdit);
 document.getElementById("editCancel").addEventListener("click", closeEdit);
 
-editForm.addEventListener("submit", async function (event) {
+editForm.addEventListener("submit", function (event) {
   event.preventDefault();
 
   var data = {
@@ -257,44 +252,26 @@ editForm.addEventListener("submit", async function (event) {
   };
 
   try {
-    var response = await fetch("/reservations/" + editingId, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    var result = await response.json();
-
-    if (!response.ok) {
-      editMessage.textContent = result.error;
-      editMessage.classList.remove("hidden");
-      return;
-    }
-
+    Store.update(editingId, data);
     closeEdit();
     loadReservations(); // refresh the table and the counts
   } catch (error) {
-    editMessage.textContent = "Could not reach the server.";
+    editMessage.textContent = error.message || "Could not update the reservation.";
     editMessage.classList.remove("hidden");
   }
 });
 
 // ---------- DELETE ----------
-async function deleteReservation(id) {
-  var sure = confirm("Are you sure you want to delete this reservation?");
-  if (!sure) {
+function deleteReservation(id) {
+  if (!confirm("Are you sure you want to delete this reservation?")) {
     return;
   }
 
   try {
-    var response = await fetch("/reservations/" + id, { method: "DELETE" });
-    if (!response.ok) {
-      var result = await response.json();
-      alert(result.error);
-      return;
-    }
+    Store.remove(id);
     loadReservations(); // refresh
   } catch (error) {
-    alert("Could not reach the server.");
+    alert(error.message || "Could not delete the reservation.");
   }
 }
 
